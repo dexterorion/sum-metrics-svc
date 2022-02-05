@@ -12,10 +12,10 @@ import (
 
 type MetricsHandler struct {
 	log           *zap.SugaredLogger
-	metricsUpdate *ports.MetricsUpdate
+	metricsUpdate ports.MetricsUpdate
 }
 
-func NewMetricsHandler(ws *restful.WebService, metricsUpdate *ports.MetricsUpdate) *MetricsHandler {
+func NewMetricsHandler(ws *restful.WebService, metricsUpdate ports.MetricsUpdate) *MetricsHandler {
 	handler := &MetricsHandler{
 		log:           logging.Init("metrics_handler"),
 		metricsUpdate: metricsUpdate,
@@ -44,7 +44,19 @@ func NewMetricsHandler(ws *restful.WebService, metricsUpdate *ports.MetricsUpdat
 }
 
 func (h *MetricsHandler) GetMetricSum(req *restful.Request, resp *restful.Response) {
+	key := req.PathParameter("key")
 
+	metricSum, err := h.metricsUpdate.GetMetricSum(req.Request.Context(), key)
+	if err != nil {
+		h.log.Errorw("Error on getting metric sum", "key", key, "error", err)
+		resp.WriteHeader(http.StatusInternalServerError)
+		resp.WriteAsJson(&shared.ErrorResponse{Message: err.Error(), Code: http.StatusInternalServerError})
+		return
+	}
+
+	response := &GetMetricSumResponse{}
+	response.FromDomain(metricSum)
+	resp.WriteAsJson(response)
 }
 
 func (h *MetricsHandler) PostMetric(req *restful.Request, resp *restful.Response) {
@@ -57,15 +69,23 @@ func (h *MetricsHandler) PostMetric(req *restful.Request, resp *restful.Response
 		return
 	}
 
-	// key := req.PathParameter("key")
+	if err := data.Validate(); err != nil {
+		h.log.Errorw("Error validating metric input", "error", err)
+		resp.WriteHeader(http.StatusBadRequest)
+		resp.WriteAsJson(&shared.ErrorResponse{Message: err.Error(), Code: http.StatusBadRequest})
+		return
+	}
 
-	// err := h.userValidationCreationUseCase.OnboardUser(req.Request.Context(), onboardingUser)
-	// if err != nil {
-	// 	h.log.Errorw("Error on onboarding use case", "data", data, "originator", originator, "error", err)
-	// 	resp.WriteHeader(http.StatusInternalServerError)
-	// 	resp.WriteAsJson(&shared.ErrorResponse{Message: err.Error(), Code: http.StatusInternalServerError})
-	// 	return
-	// }
+	key := req.PathParameter("key")
+
+	err := h.metricsUpdate.AddMetric(req.Request.Context(), data.ToDomain(key))
+
+	if err != nil {
+		h.log.Errorw("Error on adding new metric", "data", data, "error", err)
+		resp.WriteHeader(http.StatusInternalServerError)
+		resp.WriteAsJson(&shared.ErrorResponse{Message: err.Error(), Code: http.StatusInternalServerError})
+		return
+	}
 
 	resp.WriteAsJson(&shared.EmptyBody{})
 }

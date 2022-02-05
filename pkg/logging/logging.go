@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/blendle/zapdriver"
-	env_vars "github.com/dexterorion/mao-backend/helpers/envvars"
+	env_vars "github.com/dexterorion/sum-metrics-svc/pkg/envvars"
 	"github.com/onsi/gomega/gstruct/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

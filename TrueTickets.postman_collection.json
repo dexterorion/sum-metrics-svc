@@ -1,0 +1,59 @@
+{
+	"info": {
+		"_postman_id": "41fff96b-6de2-459d-a4db-2b5f77d3b41b",
+		"name": "TrueTickets",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Metric Sum",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/metric/test/sum",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"metric",
+						"test",
+						"sum"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add New Metric",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"value\": 20\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/metric/test",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"metric",
+						"test"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

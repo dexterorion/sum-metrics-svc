@@ -21,7 +21,6 @@ type WebHandler struct {
 
 func NewWebHandler(injectHandlers func(ws *restful.WebService) error) (*WebHandler, error) {
 	ws := new(restful.WebService)
-
 	ws = ws.Path("/api")
 
 	if injectHandlers != nil {
@@ -31,17 +30,21 @@ func NewWebHandler(injectHandlers func(ws *restful.WebService) error) (*WebHandl
 		}
 	}
 
-	restful.Add(ws)
+	restful.DefaultContainer.Add(ws)
 
 	return &WebHandler{
 		ws: ws,
 	}, nil
 }
 
-func (h *WebHandler) StartBlocking() {
+func (h *WebHandler) GetWs() *restful.WebService {
+	return h.ws
+}
+
+func (h *WebHandler) StartBlocking(port string) {
 	go func() {
-		log.Infow("Listening on port 8080")
-		log.Fatal(http.ListenAndServe(":8080", nil))
+		log.Infow("Listening on port " + port)
+		log.Fatal(http.ListenAndServe(port, nil))
 	}()
 
 	signals := make(chan os.Signal, 1)
